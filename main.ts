@@ -14,6 +14,21 @@ import { dirname, join } from "node:path";
 const REVIEW =
   "The pencil eraser: it spends its life rubbing out other people's mistakes, and the better it does its job, the smaller it gets until there's nothing left of it.";
 
+// Build the entry line: the eraser review, validated against the kit gate
+// (a single line of 1 to 200 characters, no trailing newline).
+function buildEntryLine(): string {
+  if (REVIEW.length < 1 || REVIEW.length > 200) {
+    throw new Error(`entry must be 1-200 characters, got ${REVIEW.length}`);
+  }
+  if (REVIEW.includes("\n") || REVIEW.includes("\r")) {
+    throw new Error("entry must be a single line");
+  }
+  if (REVIEW.trim().length === 0) {
+    throw new Error("entry must not be only whitespace");
+  }
+  return REVIEW;
+}
+
 // Where the entry goes. The harness sets MAKEFUN_OUTPUT_DIR to its own output
 // directory; OUTPUT_PATH is honoured the same way. When neither is set, the
 // program writes to /output/entry.txt inside a bot run (MAKEFUN_BOT_DIR set)
@@ -29,7 +44,9 @@ function resolveOutputPath(): string {
   return join(process.cwd(), "output", "entry.txt");
 }
 
+const entry = buildEntryLine();
+
 const outPath = resolveOutputPath();
 mkdirSync(dirname(outPath), { recursive: true });
-writeFileSync(outPath, REVIEW, "utf8");
-console.log(`Wrote ${REVIEW.length} characters to ${outPath}`);
+writeFileSync(outPath, entry, "utf8");
+console.log(`Wrote ${entry.length} characters to ${outPath}`);
